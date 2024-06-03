@@ -8,8 +8,12 @@
 <VBox alignment="CENTER" xmlns="http://javafx.com/javafx/17.0.2-ea"
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="kz.medet.client.Controller">
+    <HBox fx:id="loginBox">
+        <TextField fx:id="loginField" HBox.hgrow="ALWAYS" promptText="Введите ник"/>
+        <Button text="Войти" onAction="#login"/>
+    </HBox>
     <TextArea fx:id="msgArea" VBox.vgrow="ALWAYS" editable="false" focusTraversable="false"/>
-    <HBox>
+    <HBox fx:id="msgBox" visible="false" managed="false">
         <TextField fx:id="msgField" HBox.hgrow="ALWAYS" promptText="Введите сообщение" onAction="#sendMsg"/>
         <Button text="Отправить" onAction="#sendMsg"/>
     </HBox>
