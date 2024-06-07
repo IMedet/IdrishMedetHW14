@@ -9,51 +9,81 @@ import java.util.List;
 public class Server {
     private int port;
     private List<ClientHandler> list;
+    private AuthenticationProvider authenticationProvider;
+
     public Server(int port) {
         this.port = port;
         this.list = new ArrayList<>();
-        try(ServerSocket serverSocket = new ServerSocket(port)) {
+        this.authenticationProvider = new InMemoryAuthProvider();
+        try (ServerSocket serverSocket = new ServerSocket(port)) {
             System.out.println("Сервер запущен на порту 8189. Ожидаем подключение клиента...");
             while (true) {
                 Socket socket = serverSocket.accept();
-                new Thread(new ClientHandler(this, socket)).start();
+                new ClientHandler(this, socket);
             }
-
-        } catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public void broadcastMessage(String msg) throws IOException {
-        for(ClientHandler clientHandler : list) {
+    public void broadcastMessage(String msg) {
+        for (ClientHandler clientHandler : list) {
             clientHandler.sendMessage(msg);
-        }
-    }
-
-    public void sendPrivateMessage(String fromUsername, String toUsername, String msg) throws IOException {
-        for (ClientHandler client : list){
-            if(client.getUsername().equals(toUsername)){
-                client.sendMessage("Message from " + fromUsername + ": " + msg);
-                break;
-            }
         }
     }
 
     public void subscribe(ClientHandler clientHandler) {
         list.add(clientHandler);
+        sendClientList();
     }
 
     public void unsubscribe(ClientHandler clientHandler) {
         list.remove(clientHandler);
+        sendClientList();
     }
 
-    public boolean isUsernameTaken(String username){
-        for (ClientHandler client : list){
-            if(client.getUsername().equals(username)){
+    public boolean isUserOnline(String username) {
+        for (ClientHandler clientHandler : list) {
+            if (clientHandler.getUsername().equals(username)) {
                 return true;
             }
         }
-
         return false;
+    }
+
+    public void sendPrivateMsg(ClientHandler sender, String receiver, String msg) {
+        for (ClientHandler c : list) {
+            if (c.getUsername().equals(receiver)) {
+                c.sendMessage("From: " + sender.getUsername() + " Message: " + msg);
+                sender.sendMessage("Receiver: " + receiver + " Message: " + msg);
+                return;
+            }
+        }
+        sender.sendMessage("Unable to send message to " + receiver);
+    }
+
+    public void sendClientList() {
+        StringBuilder builder = new StringBuilder("/clients_list ");
+        for (ClientHandler c : list) {
+            builder.append(c.getUsername()).append(" ");
+        }
+        builder.setLength(builder.length() - 1);
+        String clientList = builder.toString();
+        for (ClientHandler c : list) {
+            c.sendMessage(clientList);
+        }
+    }
+
+    public void updateUsername(String oldUsername, String newUsername) {
+        for (ClientHandler clientHandler : list) {
+            if (clientHandler.getUsername().equals(oldUsername)) {
+                clientHandler.sendMessage("Your username has been updated to " + newUsername);
+                break;
+            }
+        }
+    }
+
+    public AuthenticationProvider getAuthenticationProvider() {
+        return authenticationProvider;
     }
 }
