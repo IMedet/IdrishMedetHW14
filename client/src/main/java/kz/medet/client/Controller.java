@@ -6,9 +6,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.Socket;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -30,6 +28,7 @@ public class Controller implements Initializable {
     private DataInputStream in;
     private DataOutputStream out;
     private String username;
+    private File historyFile;
 
     public void setUsername(String username) {
         this.username = username;
@@ -47,6 +46,8 @@ public class Controller implements Initializable {
             msgBox.setManaged(true);
             clientsList.setVisible(true);
             clientsList.setManaged(true);
+            historyFile = new File(username + "_history.txt");
+            loadHistory();
         }
     }
 
@@ -62,6 +63,7 @@ public class Controller implements Initializable {
                         String msg = in.readUTF();
                         if (msg.startsWith("/login_ok ")) {
                             setUsername(msg.split("\\s+")[1]);
+                            historyFile = new File(username + "_history.txt");
                             break;
                         }
                         if (msg.startsWith("/login_failed ")) {
@@ -83,6 +85,7 @@ public class Controller implements Initializable {
                             continue;
                         }
                         msgArea.appendText(msg + "\n");
+                        writeHistory(msg);
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -106,7 +109,6 @@ public class Controller implements Initializable {
             Alert alert = new Alert(Alert.AlertType.ERROR, "Имя пользователя не может быть пустым", ButtonType.OK);
             alert.showAndWait();
             return;
-
         }
         try {
             out.writeUTF("/login " + loginField.getText() + " " + passwordField.getText());
@@ -140,4 +142,28 @@ public class Controller implements Initializable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         setUsername(null);
     }
+
+    private void writeHistory(String msg) {
+        try(BufferedWriter writer = new BufferedWriter(new FileWriter(historyFile,true))){
+            writer.write(msg);
+            writer.newLine();
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+
+    private void loadHistory() {
+        if(historyFile != null && historyFile.exists()) {
+            try(BufferedReader reader = new BufferedReader(new FileReader(historyFile))){
+                String line;
+                while ((line = reader.readLine()) != null ){
+                    msgArea.appendText(line + "\n");
+                }
+            }catch (IOException e){
+                e.printStackTrace();
+            }
+        }
+    }
+
+
 }
