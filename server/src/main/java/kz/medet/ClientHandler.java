@@ -1,11 +1,18 @@
 package kz.medet;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.Collections;
+import java.util.List;
 
 public class ClientHandler {
+    private static final Logger logger = LogManager.getLogger(ClientHandler.class);
+
     private Socket socket;
     private DataInputStream in;
     private DataOutputStream out;
@@ -34,16 +41,19 @@ public class ClientHandler {
                         String nick = server.getAuthenticationProvider().getUsernameByLoginAndPassword(login, password);
                         if (nick == null) {
                             sendMessage("/login_failed Incorrect login/password");
+                            logger.warn("Login failed for login: " + login);
                             continue;
                         }
 
                         if (server.isUserOnline(nick)) {
                             sendMessage("/login_failed this username is already in use");
+                            logger.warn("Login failed for " + nick + ": Username already in use");
                             continue;
                         }
                         username = nick;
                         sendMessage("/login_ok " + username);
                         server.subscribe(this);
+                        logger.info(username + " logged in");
                         break;
                     }
                 }
@@ -55,9 +65,10 @@ public class ClientHandler {
                         continue;
                     }
                     server.broadcastMessage(username + ": " + msg);
+                    logger.info("Broadcast message from " + username + ": " + msg);
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                logger.error("Connection error with client " + username, e);
             } finally {
                 disconnect();
             }
@@ -88,6 +99,7 @@ public class ClientHandler {
 
         if (msg.equals("/who_am_i")) {
             sendMessage("Your username is: " + username);
+            logger.info(username + " requested their nickname");
             return;
         }
     }
@@ -109,6 +121,7 @@ public class ClientHandler {
                 e.printStackTrace();
             }
         }
+        logger.info(username + " disconnected");
     }
 
     public String getUsername() {

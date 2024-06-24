@@ -1,0 +1,7 @@
+14:07:51.856 [main] INFO  Server - Server started on port 8189
+14:11:04.807 [main] INFO  Server - Client connected:/127.0.0.1
+14:11:04.816 [Thread-0] INFO  Server - Alex joined the chat
+14:11:04.816 [Thread-0] INFO  ClientHandler - Alex logged in
+14:12:44.326 [main] INFO  Server - Client connected:/127.0.0.1
+14:12:44.327 [Thread-1] INFO  Server - Ben joined the chat
+14:12:44.328 [Thread-1] INFO  ClientHandler - Ben logged in

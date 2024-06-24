@@ -1,5 +1,8 @@
 package kz.medet;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -7,6 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Server {
+    private static final Logger logger = LogManager.getLogger(Server.class);
+
     private int port;
     private List<ClientHandler> list;
     private AuthenticationProvider authenticationProvider;
@@ -16,13 +21,15 @@ public class Server {
         this.list = new ArrayList<>();
         this.authenticationProvider = new InMemoryAuthProvider();
         try (ServerSocket serverSocket = new ServerSocket(port)) {
+            logger.info("Server started on port " + port);
             System.out.println("Сервер запущен на порту 8189. Ожидаем подключение клиента...");
             while (true) {
                 Socket socket = serverSocket.accept();
+                logger.info("Client connected:" + socket.getInetAddress());
                 new ClientHandler(this, socket);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("Error starting server: ", e);
         }
     }
 
@@ -35,11 +42,13 @@ public class Server {
     public void subscribe(ClientHandler clientHandler) {
         list.add(clientHandler);
         sendClientList();
+        logger.info(clientHandler.getUsername() + " joined the chat");
     }
 
     public void unsubscribe(ClientHandler clientHandler) {
         list.remove(clientHandler);
         sendClientList();
+        logger.info(clientHandler.getUsername() + " left the chat");
     }
 
     public boolean isUserOnline(String username) {
@@ -56,6 +65,7 @@ public class Server {
             if (c.getUsername().equals(receiver)) {
                 c.sendMessage("From: " + sender.getUsername() + " Message: " + msg);
                 sender.sendMessage("Receiver: " + receiver + " Message: " + msg);
+                logger.info("Private message from " + sender.getUsername() + " to " + receiver + ": " + msg);
                 return;
             }
         }
