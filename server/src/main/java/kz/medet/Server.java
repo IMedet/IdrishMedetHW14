@@ -8,6 +8,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Server {
     private static final Logger logger = LogManager.getLogger(Server.class);
@@ -34,9 +35,7 @@ public class Server {
     }
 
     public void broadcastMessage(String msg) {
-        for (ClientHandler clientHandler : list) {
-            clientHandler.sendMessage(msg);
-        }
+        list.forEach(clientHandler -> clientHandler.sendMessage(msg));
     }
 
     public void subscribe(ClientHandler clientHandler) {
@@ -52,45 +51,34 @@ public class Server {
     }
 
     public boolean isUserOnline(String username) {
-        for (ClientHandler clientHandler : list) {
-            if (clientHandler.getUsername().equals(username)) {
-                return true;
-            }
-        }
-        return false;
+        return list.stream().anyMatch(clientHandler -> clientHandler.getUsername().equals(username));
     }
 
     public void sendPrivateMsg(ClientHandler sender, String receiver, String msg) {
-        for (ClientHandler c : list) {
-            if (c.getUsername().equals(receiver)) {
-                c.sendMessage("From: " + sender.getUsername() + " Message: " + msg);
-                sender.sendMessage("Receiver: " + receiver + " Message: " + msg);
-                logger.info("Private message from " + sender.getUsername() + " to " + receiver + ": " + msg);
-                return;
-            }
-        }
-        sender.sendMessage("Unable to send message to " + receiver);
+        list.stream()
+                .filter(clientHandler -> clientHandler.getUsername().equals(receiver))
+                .findFirst()
+                .ifPresentOrElse(
+                        clientHandler -> {
+                            clientHandler.sendMessage("From: " + sender.getUsername() + " Message: " + msg);
+                            sender.sendMessage("Receiver: " + receiver + " Message: " + msg);
+                            logger.info("Private message from " + sender.getUsername() + " to " + receiver + ": " + msg);
+                        },
+                        () -> sender.sendMessage("Unable to send message to " + receiver)
+                );
     }
 
     public void sendClientList() {
-        StringBuilder builder = new StringBuilder("/clients_list ");
-        for (ClientHandler c : list) {
-            builder.append(c.getUsername()).append(" ");
-        }
-        builder.setLength(builder.length() - 1);
-        String clientList = builder.toString();
-        for (ClientHandler c : list) {
-            c.sendMessage(clientList);
-        }
+        String clientList = list.stream()
+                .map(ClientHandler::getUsername)
+                .collect(Collectors.joining(" ", "/clients_list ",""));
     }
 
     public void updateUsername(String oldUsername, String newUsername) {
-        for (ClientHandler clientHandler : list) {
-            if (clientHandler.getUsername().equals(oldUsername)) {
-                clientHandler.sendMessage("Your username has been updated to " + newUsername);
-                break;
-            }
-        }
+        list.stream()
+                .filter(clientHandler -> clientHandler.getUsername().equals(oldUsername))
+                .findFirst()
+                .ifPresent(clientHandler -> clientHandler.sendMessage("Your username has been updated to " + newUsername));
     }
 
     public AuthenticationProvider getAuthenticationProvider() {

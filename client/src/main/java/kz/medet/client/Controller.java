@@ -9,7 +9,9 @@ import javafx.scene.layout.HBox;
 import java.io.*;
 import java.net.Socket;
 import java.net.URL;
+import java.nio.file.*;
 import java.util.ResourceBundle;
+import java.util.stream.Stream;
 
 public class Controller implements Initializable {
 
@@ -28,7 +30,7 @@ public class Controller implements Initializable {
     private DataInputStream in;
     private DataOutputStream out;
     private String username;
-    private File historyFile;
+    private Path historyFile;
 
     public void setUsername(String username) {
         this.username = username;
@@ -46,7 +48,7 @@ public class Controller implements Initializable {
             msgBox.setManaged(true);
             clientsList.setVisible(true);
             clientsList.setManaged(true);
-            historyFile = new File(username + "_history.txt");
+            historyFile = Paths.get(username + "_history.txt");
             loadHistory();
         }
     }
@@ -63,7 +65,7 @@ public class Controller implements Initializable {
                         String msg = in.readUTF();
                         if (msg.startsWith("/login_ok ")) {
                             setUsername(msg.split("\\s+")[1]);
-                            historyFile = new File(username + "_history.txt");
+                            historyFile = Paths.get(username + "_history.txt");
                             break;
                         }
                         if (msg.startsWith("/login_failed ")) {
@@ -144,26 +146,20 @@ public class Controller implements Initializable {
     }
 
     private void writeHistory(String msg) {
-        try(BufferedWriter writer = new BufferedWriter(new FileWriter(historyFile,true))){
-            writer.write(msg);
-            writer.newLine();
-        }catch (IOException e){
+        try {
+            Files.write(historyFile, (msg + System.lineSeparator()).getBytes(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     private void loadHistory() {
-        if(historyFile != null && historyFile.exists()) {
-            try(BufferedReader reader = new BufferedReader(new FileReader(historyFile))){
-                String line;
-                while ((line = reader.readLine()) != null ){
-                    msgArea.appendText(line + "\n");
-                }
-            }catch (IOException e){
+        if (historyFile != null && Files.exists(historyFile)) {
+            try (Stream<String> lines = Files.lines(historyFile)) {
+                lines.forEach(line -> msgArea.appendText(line + System.lineSeparator()));
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }
     }
-
-
 }

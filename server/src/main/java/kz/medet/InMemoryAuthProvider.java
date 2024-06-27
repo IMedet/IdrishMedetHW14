@@ -29,11 +29,10 @@ public class InMemoryAuthProvider implements AuthenticationProvider {
 
     @Override
     public String getUsernameByLoginAndPassword(String login, String password) {
-        for (User u : list) {
-            if (u.login.equals(login) && u.password.equals(password)) {
-                return u.username;
-            }
-        }
-        return null;
+        return list.stream()
+                .filter(u ->u.login.equals(login) && u.password.equals(password))
+                .map(u->u.username)
+                .findFirst()
+                .orElse(null);
     }
 }

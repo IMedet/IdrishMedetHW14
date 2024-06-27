@@ -5,3 +5,44 @@
 14:12:44.326 [main] INFO  Server - Client connected:/127.0.0.1
 14:12:44.327 [Thread-1] INFO  Server - Ben joined the chat
 14:12:44.328 [Thread-1] INFO  ClientHandler - Ben logged in
+14:33:01.046 [main] INFO  Server - Server started on port 8189
+14:33:17.479 [main] INFO  Server - Client connected:/127.0.0.1
+14:33:17.494 [Thread-0] INFO  Server - Alex joined the chat
+14:33:17.496 [Thread-0] INFO  ClientHandler - Alex logged in
+14:33:40.379 [main] INFO  Server - Client connected:/127.0.0.1
+14:33:40.385 [Thread-1] WARN  ClientHandler - Login failed for Alex: Username already in use
+14:33:46.552 [Thread-1] INFO  Server - Ben joined the chat
+14:33:46.552 [Thread-1] INFO  ClientHandler - Ben logged in
+14:33:49.949 [Thread-1] INFO  ClientHandler - Broadcast message from Ben: hey
+14:33:54.858 [Thread-0] INFO  ClientHandler - Broadcast message from Alex: what s up
+14:34:06.622 [Thread-1] ERROR ClientHandler - Connection error with client Ben
+java.net.SocketException: Connection reset
+	at sun.nio.ch.NioSocketImpl.implRead(NioSocketImpl.java:318) ~[?:?]
+	at sun.nio.ch.NioSocketImpl.read(NioSocketImpl.java:345) ~[?:?]
+	at sun.nio.ch.NioSocketImpl$1.read(NioSocketImpl.java:794) ~[?:?]
+	at java.net.Socket$SocketInputStream.read(Socket.java:1025) ~[?:?]
+	at java.net.Socket$SocketInputStream.read(Socket.java:1019) ~[?:?]
+	at java.io.DataInputStream.readUnsignedShort(DataInputStream.java:334) ~[?:?]
+	at java.io.DataInputStream.readUTF(DataInputStream.java:583) ~[?:?]
+	at java.io.DataInputStream.readUTF(DataInputStream.java:558) ~[?:?]
+	at kz.medet.ClientHandler.lambda$new$0(ClientHandler.java:61) ~[classes/:?]
+	at java.lang.Thread.run(Thread.java:1623) [?:?]
+14:34:06.637 [Thread-1] INFO  Server - Ben left the chat
+14:34:06.637 [Thread-1] INFO  ClientHandler - Ben disconnected
+14:34:24.401 [main] INFO  Server - Client connected:/127.0.0.1
+14:34:24.405 [Thread-2] INFO  Server - Ben joined the chat
+14:34:24.406 [Thread-2] INFO  ClientHandler - Ben logged in
+14:34:28.572 [Thread-2] ERROR ClientHandler - Connection error with client Ben
+java.net.SocketException: Connection reset
+	at sun.nio.ch.NioSocketImpl.implRead(NioSocketImpl.java:318) ~[?:?]
+	at sun.nio.ch.NioSocketImpl.read(NioSocketImpl.java:345) ~[?:?]
+	at sun.nio.ch.NioSocketImpl$1.read(NioSocketImpl.java:794) ~[?:?]
+	at java.net.Socket$SocketInputStream.read(Socket.java:1025) ~[?:?]
+	at java.net.Socket$SocketInputStream.read(Socket.java:1019) ~[?:?]
+	at java.io.DataInputStream.readUnsignedShort(DataInputStream.java:334) ~[?:?]
+	at java.io.DataInputStream.readUTF(DataInputStream.java:583) ~[?:?]
+	at java.io.DataInputStream.readUTF(DataInputStream.java:558) ~[?:?]
+	at kz.medet.ClientHandler.lambda$new$0(ClientHandler.java:61) ~[classes/:?]
+	at java.lang.Thread.run(Thread.java:1623) [?:?]
+14:34:28.573 [Thread-2] INFO  Server - Ben left the chat
+14:34:28.573 [Thread-2] INFO  ClientHandler - Ben disconnected
